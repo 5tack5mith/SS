@@ -1,0 +1,73 @@
+.launch-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: url("/your-background.jpg") no-repeat center center/cover;
+}
+
+.glass-card {
+  width: 350px;
+  padding: 2rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  color: #fff;
+  text-align: center;
+}
+
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  margin: 1rem 0;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.tabs button.active {
+  background: #ff66a6;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.form input {
+  padding: 0.6rem;
+  border: none;
+  border-radius: 10px;
+  outline: none;
+}
+
+.form button {
+  padding: 0.7rem;
+  border: none;
+  border-radius: 10px;
+  background: #ff66a6;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.form button:hover {
+  background: #ff3385;
+}
+
+.message {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
