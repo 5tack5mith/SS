@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body { @apply antialiased; margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI'; }
+
+.glass-card {
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.polaroid {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.16);
+  border-radius: 14px;
+  border: 8px solid rgba(255,255,255,0.95);
+  background-clip: padding-box;
+}
+.font-marker { font-family: 'Permanent Marker', cursive; }
