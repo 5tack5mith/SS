@@ -1,21 +1,15 @@
-import { supabase } from "./supabaseClient"
+import React from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import LaunchScreen from './LaunchScreen'
+import Home from './Home'
 
-function App() {
-  async function testConnection() {
-    const { data, error } = await supabase.from("profiles").select("*").limit(1)
-    if (error) {
-      console.error("❌ Supabase error:", error.message)
-    } else {
-      console.log("✅ Supabase working! Example row:", data)
-    }
-  }
-
+export default function App(){
   return (
-    <div>
-      <h1>Supabase Test</h1>
-      <button onClick={testConnection}>Test Supabase</button>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path='/' element={<LaunchScreen/>} />
+        <Route path='/home' element={<Home/>} />
+      </Routes>
+    </BrowserRouter>
   )
 }
-
-export default App
