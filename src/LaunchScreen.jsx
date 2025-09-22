@@ -27,14 +27,7 @@ export default function LaunchScreen(){
   
   const navigate = useNavigate()
 
-  useEffect(()=>{
-    const savedYou = localStorage.getItem('you')
-    const savedThem = localStorage.getItem('them')
-    const savedDate = localStorage.getItem('date')
-    if(savedYou) setSignupData(prev => ({...prev, you: savedYou}))
-    if(savedThem) setSignupData(prev => ({...prev, them: savedThem}))
-    if(savedDate) setSignupData(prev => ({...prev, date: savedDate}))
-  },[])
+  // Do not prefill Sign Up inputs; keep them empty and use placeholders
 
   const handleSignup = async (e) => {
     e.preventDefault()
@@ -50,44 +43,16 @@ export default function LaunchScreen(){
       
       if (authError) throw authError
       
-      if (authData.user) {
-        // Wait a moment for the user to be fully authenticated
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // Save profile data
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: authData.user.id,
-              you_name: signupData.you || 'You 💌',
-              them_name: signupData.them || 'Them 💌',
-              start_date: signupData.date || '',
-              created_at: new Date().toISOString()
-            }
-          ])
-        
-        if (profileError) {
-          console.error('Profile error:', profileError)
-          // If profile creation fails, still save to localStorage and continue
-          console.log('Continuing with localStorage fallback')
-        }
-        
-        // Save to localStorage for backward compatibility
-        localStorage.setItem('you', signupData.you || 'You 💌')
-        localStorage.setItem('them', signupData.them || 'Them 💌')
-        localStorage.setItem('date', signupData.date || '')
-        
-        // Check if user needs email confirmation
-        if (authData.user.email_confirmed_at) {
-          // User is confirmed, navigate to home
-          navigate('/home')
-        } else {
-          // User needs to confirm email first
-          setError('Please check your email and click the confirmation link before logging in.')
-          setActiveTab('login') // Switch to login tab
-        }
-      }
+      // Do not attempt profile write here (session may not exist yet due to email confirmation/RLS).
+      // Stash the relationship details temporarily to write right after login.
+      try {
+        localStorage.setItem('pending_you', signupData.you || '')
+        localStorage.setItem('pending_them', signupData.them || '')
+        localStorage.setItem('pending_date', signupData.date || '')
+      } catch {}
+      console.log("Values at localstorage(signup): ",signupData.you, signupData.them, signupData.date)
+      setActiveTab('login')
+      setError('Account created. Please login to continue.')
     } catch (error) {
       console.error('Signup error:', error)
       setError(error.message)
@@ -112,26 +77,58 @@ export default function LaunchScreen(){
       if (data.user) {
         console.log('Login successful for user:', data.user.id)
         
-        // Fetch profile data
+        // Fetch profile data (may be missing for brand new users)
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
-          .select('*')
+          .select('you_name, them_name, start_date')
           .eq('id', data.user.id)
-          .single()
+          .maybeSingle()
         
         console.log('Profile data:', profileData, 'Profile error:', profileError)
         
-        // Save to localStorage for backward compatibility
-        if (profileData) {
-          localStorage.setItem('you', profileData.you_name || 'You 💌')
-          localStorage.setItem('them', profileData.them_name || 'Them 💌')
-          localStorage.setItem('date', profileData.start_date || '')
-        } else {
-          // If no profile data found, use default values
-          localStorage.setItem('you', 'You 💌')
-          localStorage.setItem('them', 'Them 💌')
-          localStorage.setItem('date', '')
+        // Determine what to write: prefer pending values captured at signup
+        let pendingYou = null, pendingThem = null, pendingDate = null
+        try {
+          pendingYou = localStorage.getItem('pending_you') || null
+          pendingThem = localStorage.getItem('pending_them') || null
+          pendingDate = localStorage.getItem('pending_date') || null
+        } catch {}
+        console.log("Values at localstorage(login): ",pendingYou, pendingThem, pendingDate)
+
+        // If profile doesn't exist OR it exists but fields are empty, upsert with pending values
+        const needsWrite = !profileData || (
+          (pendingYou && !profileData.you_name) ||
+          (pendingThem && !profileData.them_name) ||
+          (pendingDate && !profileData.start_date)
+        )
+
+        if (needsWrite) {
+          const { error: upsertErr } = await supabase
+            .from('profiles')
+            .upsert([{ 
+              id: data.user.id,
+              you_name: pendingYou ?? profileData?.you_name ?? null,
+              them_name: pendingThem ?? profileData?.them_name ?? null,
+              start_date: pendingDate ?? profileData?.start_date ?? null
+            }])
+          if (upsertErr) {
+            console.error(
+              'Profile upsert on login failed:',
+              upsertErr?.code,
+              upsertErr?.message,
+              upsertErr?.details,
+              upsertErr?.hint
+            )
+            setError(`Profile save failed: ${upsertErr?.message || 'Unknown error'}`)
+          }
         }
+
+        // Clean pending stash
+        try {
+          localStorage.removeItem('pending_you')
+          localStorage.removeItem('pending_them')
+          localStorage.removeItem('pending_date')
+        } catch {}
         
         navigate('/home')
       }
