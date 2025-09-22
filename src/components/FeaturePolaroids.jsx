@@ -2,10 +2,10 @@ import React from 'react'
 import { PolaroidCard } from './PolaroidCard'
 
 const features = [
-  { id: 'memory-tree', icon: '🌳', title: 'Memory Tree', rotation: '-rotate-6' },
+  { id: 'quizzes', icon: '🎯', title: 'Quizzes', rotation: '-rotate-6' },
   { id: 'notes', icon: '📝', title: 'Notes', rotation: 'rotate-3' },
   { id: 'date-ideas', icon: '💡', title: 'Date Ideas', rotation: '-rotate-2' },
-  { id: 'quizzes', icon: '🎯', title: 'Quizzes', rotation: 'rotate-1' },
+  { id: 'memory-tree', icon: '🌳', title: 'Memory Tree', rotation: 'rotate-1' },
 ]
 
 export function FeaturePolaroids({ theme }) {
