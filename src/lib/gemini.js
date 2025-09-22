@@ -78,3 +78,24 @@ Make sure the JSON is valid and properly formatted.`
     }
   }
 }
+
+// Simple helper for prompts that expect natural language text (not JSON)
+export async function askGeminiText(prompt) {
+  try {
+    if (!API_KEY) {
+      throw new Error('API key not configured. Please add VITE_GEMINI_API_KEY to your .env file.')
+    }
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    let text = response.text().trim()
+    // Strip code fences if any
+    if (text.startsWith('```')) {
+      text = text.replace(/^```[a-zA-Z]*\n?/,'').replace(/```\s*$/,'').trim()
+    }
+    return text
+  } catch (error) {
+    console.error('Gemini text error:', error)
+    throw new Error(`Failed to generate content: ${error.message}`)
+  }
+}
