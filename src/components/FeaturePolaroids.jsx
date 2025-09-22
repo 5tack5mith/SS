@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const features = [
   { id: 'memory-tree', icon: '🌳', title: 'Memory Tree', rotation: '-rotate-6' },
@@ -8,15 +9,20 @@ const features = [
 ]
 
 export function FeaturePolaroids({ theme }) {
+  const navigate = useNavigate()
   const bg = theme === 'starry' ? 'bg-white/20' : 'bg-white/30'
   return (
     <div className="relative w-full flex items-center justify-end pr-28">
       <div className="grid grid-cols-2 gap-8 transform translate-y-6">
         {features.map((f)=> (
-          <div key={f.id} className={`polaroid ${bg} p-6 w-64 h-80 transform ${f.rotation} transition-all duration-300 hover:scale-105 hover:z-20`}>
+          <button
+            key={f.id}
+            onClick={() => navigate(`/${f.id}`)}
+            className={`polaroid ${bg} p-6 w-64 h-80 transform ${f.rotation} transition-all duration-300 hover:scale-105 hover:z-20 text-left`}
+          >
             <div className="text-6xl mb-4">{f.icon}</div>
             <div className="text-xl font-marker">{f.title}</div>
-          </div>
+          </button>
         ))}
       </div>
     </div>
